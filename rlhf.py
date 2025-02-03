@@ -36,13 +36,9 @@ def load_data(tokenizer):
 
     dataset = dataset.map(f, remove_columns=dataset.column_names)
 
-    loader = torch.utils.data.DataLoader(dataset,
-                                         collate_fn=default_data_collator,
-                                         batch_size=4,
-                                         shuffle=True,
-                                         drop_last=True)
+    loader = torch.utils.data.DataLoader(dataset, collate_fn=default_data_collator, batch_size=4, shuffle=True, drop_last=True)
 
-    len(loader), next(iter(loader))
+    # len(loader), next(iter(loader))
 
     return loader
 
@@ -74,11 +70,7 @@ def load_model_actor():
         }]
 
     optimizer_actor = torch.optim.Adam(f(), lr=1e-5, betas=(0.9, 0.95))
-
-    scheduler_actor = get_scheduler(name='cosine',
-                                    optimizer=optimizer_actor,
-                                    num_warmup_steps=100,
-                                    num_training_steps=800)
+    scheduler_actor = get_scheduler(name='cosine', optimizer=optimizer_actor, num_warmup_steps=100, num_training_steps=800)
 
     model_actor.gradient_checkpointing_enable()
     model_actor.train()
@@ -122,14 +114,8 @@ def load_model_critic():
     model_critic = torch.load('model/critic')
 
     # 设置评委模型组件
-    optimizer_critic = torch.optim.Adam(model_critic.parameters(),
-                                        lr=5e-6,
-                                        betas=(0.9, 0.95))
-
-    scheduler_critic = get_scheduler(name='cosine',
-                                     optimizer=optimizer_critic,
-                                     num_warmup_steps=100,
-                                     num_training_steps=800)
+    optimizer_critic = torch.optim.Adam(model_critic.parameters(), lr=5e-6, betas=(0.9, 0.95))
+    scheduler_critic = get_scheduler(name='cosine', optimizer=optimizer_critic, num_warmup_steps=100, num_training_steps=800)
 
     model_critic.train()
 
@@ -183,8 +169,8 @@ def get_prob(prob, index):
     return prob.squeeze(2)
 
 
-get_prob(torch.randn(4, 123, 999), torch.randint(0, 999, (4, 123))).shape
-last_generate = None
+# get_prob(torch.randn(4, 123, 999), torch.randint(0, 999, (4, 123))).shape
+# last_generate = None
 
 
 @torch.no_grad()
