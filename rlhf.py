@@ -95,17 +95,12 @@ class CriticModel(torch.nn.Module):
         super().__init__()
 
         from transformers import AutoModel
-        self.rwtransformer = AutoModel.from_pretrained('facebook/opt-350m',
-                                                       dropout=0.0)
-
+        self.rwtransformer = AutoModel.from_pretrained('facebook/opt-350m', dropout=0.0)
         self.v_head = torch.nn.Linear(512, 1, bias=False)
-
         self.tokenizer = tokenizer
 
     def get_value(self, input_ids, attention_mask):
-        value = self.rwtransformer(
-            input_ids=input_ids,
-            attention_mask=attention_mask).last_hidden_state
+        value = self.rwtransformer(input_ids=input_ids, attention_mask=attention_mask).last_hidden_state
         return self.v_head(value).squeeze(2)
 
     def get_reward(self, input_ids, attention_mask):
@@ -213,8 +208,7 @@ def get_batch(input_ids, attention_mask):
 
     # 两个模型分别取回答被预测到的概率
     # [4, gen_lens-1]
-    prob_old = model_actor(input_ids=generate,
-                           attention_mask=generate_mask).logits
+    prob_old = model_actor(input_ids=generate, attention_mask=generate_mask).logits
     prob_old = get_prob(prob_old[:, :-1], generate[:, 1:])
 
     # 取每个词的value
@@ -222,15 +216,12 @@ def get_batch(input_ids, attention_mask):
     value_old = model_critic.get_value(generate, generate_mask)[:, :-1]
 
     # [4, gen_lens-1]
-    prob_ref = model_ref(
-        input_ids=generate.to('cpu'),
-        attention_mask=generate_mask.to('cpu')).logits.to('cuda')
+    prob_ref = model_ref(input_ids=generate.to('cpu'), attention_mask=generate_mask.to('cpu')).logits.to('cuda')
     prob_ref = get_prob(prob_ref[:, :-1], generate[:, 1:])
 
     # 取回答的分数
     # [4]
-    reward = model_reward.get_reward(generate.to('cpu'),
-                                     generate_mask.to('cpu')).to('cuda')
+    reward = model_reward.get_reward(generate.to('cpu'), generate_mask.to('cpu')).to('cuda')
 
     return generate, generate_mask, prob_old, prob_ref, value_old, reward
 
@@ -262,8 +253,7 @@ end = generate_mask[:, 256:].sum(1) + 255
 end = end.tolist()
 
 reward_kl = get_reward_kl(end, prob_old, prob_ref, reward)
-
-reward_kl.shape
+# reward_kl.shape
 
 
 # 解释见get_delta_note函数
@@ -292,8 +282,7 @@ def get_delta(value_old, reward_kl):
 
 
 delta = get_delta(value_old, reward_kl)
-
-delta.shape
+# delta.shape
 
 
 # get_delta函数的原理解释,注释性代码
@@ -363,8 +352,7 @@ def get_loss_actor(prob_new, prob_old, delta, generate_mask):
 
 
 loss_actor = get_loss_actor(prob_old, prob_old, delta, generate_mask)
-
-loss_actor
+# loss_actor
 
 
 def get_loss_critic(value_new, value_old, delta, generate_mask):
@@ -393,8 +381,7 @@ def get_loss_critic(value_new, value_old, delta, generate_mask):
 
 
 loss_critic = get_loss_critic(value_old, value_old, delta, generate_mask)
-
-loss_critic
+# loss_critic
 
 
 def train(generate, generate_mask, prob_old, prob_ref, value_old, reward, do_step):
@@ -426,8 +413,7 @@ def train(generate, generate_mask, prob_old, prob_ref, value_old, reward, do_ste
 
     # 重新计算回答被生成的概率
     # [4, gen_lens-1]
-    prob_new = model_actor(input_ids=generate,
-                           attention_mask=generate_mask).logits
+    prob_new = model_actor(input_ids=generate, attention_mask=generate_mask).logits
     prob_new = get_prob(prob_new[:, :-1], generate[:, 1:])
 
     # 更新actor
